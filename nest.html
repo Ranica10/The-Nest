@@ -1,5 +1,141 @@
-<html>
-  <body>
-    <h1>The Nest</h1>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Nest</title>
+  <link rel="stylesheet" href="nest.css" />
+</head>
+<body>
+  <div class="shell">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-top">
+        <div class="brand">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2C6.5 2 4 4.5 4 7c0 1.5.6 2.8 1.5 3.8L10 18l4.5-7.2C15.4 9.8 16 8.5 16 7c0-2.5-2.5-5-6-5z" fill="var(--color-primary)" fill-opacity="0.2" />
+            <path d="M10 2C6.5 2 4 4.5 4 7c0 1.5.6 2.8 1.5 3.8L10 18l4.5-7.2C15.4 9.8 16 8.5 16 7c0-2.5-2.5-5-6-5z" stroke="var(--color-primary)" stroke-width="1.4" stroke-linejoin="round" />
+            <circle cx="10" cy="7" r="2" fill="var(--color-primary)" />
+          </svg>
+          <span class="brand-name">The Nest</span>
+        </div>
+        <button id="add-page-btn" class="btn-add">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <span id="add-page-label">Add current page</span>
+        </button>
+      </div>
+
+      <!-- Project selector -->
+      <div class="project-selector-wrap">
+        <button id="project-pill" class="project-pill">
+          <span id="project-dot" class="dot"></span>
+          <span id="project-name" class="project-name"></span>
+          <span id="project-count" class="mono muted"></span>
+          <svg id="project-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" class="muted">
+            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <div id="project-dropdown" class="project-dropdown hidden">
+          <div id="project-list"></div>
+          <div class="new-project-row">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" class="muted">
+              <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+            <input id="new-project-input" class="new-project-input" placeholder="New project name…" />
+            <button id="create-project-btn" class="create-pill">Create</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn" data-tab="pages">Pages</button>
+        <button class="tab-btn" data-tab="query">Query</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Pages tab -->
+      <div id="pages-view" class="view">
+        <div id="pages-list" class="pages-list"></div>
+        <div id="empty-state" class="empty-state hidden">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" opacity="0.25">
+            <path d="M24 6C15 6 10 13 10 18c0 3.5 1.5 6.5 3.5 9L24 44l10.5-17C36.5 24.5 38 21.5 38 18c0-5-5-12-14-12z" stroke="var(--color-foreground)" stroke-width="1.5" stroke-linejoin="round" />
+            <circle cx="24" cy="18" r="5" stroke="var(--color-foreground)" stroke-width="1.5" />
+          </svg>
+          <div>
+            <p class="empty-title">Your nest is empty</p>
+            <p class="empty-desc">Browse to any webpage — a paper, article, or doc — then click
+              <span class="accent-primary">"Add current page"</span> to begin building your collection.</p>
+          </div>
+          <div class="privacy-note">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="muted">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3" />
+              <path d="M7 5v2.5L8.5 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+            </svg>
+            <p>Pages are indexed locally — your data stays private.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Query tab -->
+      <div id="query-view" class="view hidden">
+        <div class="query-body">
+
+          <div id="query-idle" class="query-idle">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" opacity="0.25">
+              <circle cx="16" cy="16" r="10" stroke="var(--color-foreground)" stroke-width="1.5" />
+              <path d="M23.5 23.5L31 31" stroke="var(--color-foreground)" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M12 16h8M16 12v8" stroke="var(--color-foreground)" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+            <div>
+              <p class="empty-title">Ask anything</p>
+              <p id="query-idle-desc" class="empty-desc"></p>
+            </div>
+          </div>
+
+          <div id="query-loading" class="query-loading hidden">
+            <div class="dots">
+              <span style="animation-delay:0s"></span>
+              <span style="animation-delay:0.2s"></span>
+              <span style="animation-delay:0.4s"></span>
+            </div>
+            <p id="query-loading-text" class="muted small"></p>
+          </div>
+
+          <div id="query-results" class="query-results hidden">
+            <p id="query-results-label" class="mono small muted results-label"></p>
+            <div id="query-results-list" class="results-list"></div>
+          </div>
+
+        </div>
+
+        <div class="query-input-area">
+          <div id="query-input-row" class="query-input-row">
+            <textarea id="query-input" class="query-input" placeholder="Ask a question across your pages…" rows="1"></textarea>
+            <button id="query-submit" class="query-submit">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 11L11 2M11 2H4.5M11 2V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <p class="hint">Enter to search · Shift+Enter for newline</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span id="status-text" class="mono small muted"></span>
+    </div>
+
+  </div>
+
+  <script src="nest.js"></script>
+</body>
 </html>
