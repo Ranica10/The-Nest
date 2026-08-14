@@ -4,7 +4,14 @@
   "version": "1.0",
   "manifest_version": 3,
   "permissions": [
-    "sidePanel"
+    "sidePanel",
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "action": {
     "default_title": "Open The Nest"

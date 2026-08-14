@@ -1,6 +1,4 @@
-// Open the side panel when the extension is clicked
+// Open the side panel when the extension icon is clicked
 chrome.sidePanel
-  .setPanelBehavior({
-    openPanelOnActionClick: true
-  })
+  .setPanelBehavior({ openPanelOnActionClick: true })
   .catch(console.error);
