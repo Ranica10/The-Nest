@@ -68,3 +68,52 @@ function domainOf(url) {
 function formatDate(d) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
+
+// ─── Rendering ──────────────────────────────────────────────────────────
+
+const el = id => document.getElementById(id); // Get an element by its ID
+
+// Render the entire UI based on the current state, including project info, tabs, pages, and query results.
+function render() {
+  const project = activeProject(); // Get the currently active project
+  if (!project) return;
+
+  // Project pill
+  el('project-dot').style.background = project.color; // Set the color of the project dot to the project's color
+  el('project-name').textContent = project.name; // Set the project name in the UI
+  el('project-count').textContent = `${project.pages.length} page${project.pages.length !== 1 ? 's' : ''}`; // Show the number of pages in the project
+  el('project-chevron').style.transform = state.ui.dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)'; // Rotate the icon if dropdown is open
+
+  // Dropdown
+  el('project-dropdown').classList.toggle('hidden', !state.ui.dropdownOpen); // Show or hide the project dropdown based on the state
+  renderProjectList(project); // Render the list of available projects in the dropdown
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === state.ui.tab); // Highlight the active tab based on the current state
+  });
+  el('pages-view').classList.toggle('hidden', state.ui.tab !== 'pages'); // Show or hide the pages view based on the current tab
+  el('query-view').classList.toggle('hidden', state.ui.tab !== 'query'); // Show or hide the query view based on the current tab
+
+  // Pages view
+  renderPages(project);
+
+  // Query view
+  renderQuery(project);
+
+  // Status bar
+  if (state.ui.addError) {
+    el('status-text').textContent = state.ui.addError; // Display any error message related to adding a page
+    el('status-text').style.color = 'var(--color-danger)';
+  } else if (state.ui.tab === 'query' && state.ui.queryStatus === 'loading') {
+    el('status-text').textContent = `Searching across ${project.pages.length} pages…`; // Display a loading message while searching
+    el('status-text').style.color = '';
+  } else {
+    el('status-text').textContent = `${project.pages.length} article${project.pages.length !== 1 ? 's' : ''} indexed`; // Display the number of articles
+    el('status-text').style.color = '';
+  }
+
+  // Add page button state
+  el('add-page-btn').disabled = state.ui.addingPage === true;
+  el('add-page-label').textContent = state.ui.addingPage ? 'Adding…' : 'Add current page'; // Update the button label based on whether a page is being added
+}
