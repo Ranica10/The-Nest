@@ -211,3 +211,43 @@ function renderPages(project) {
     listEl.appendChild(item);
   });
 }
+
+// Render the query tab by toggling idle/loading/results states
+function renderQuery(project) {
+  // Diff states: idle (no query), loading (query in progress), results (query completed)
+  const idle = el('query-idle');
+  const loading = el('query-loading');
+  const results = el('query-results');
+
+  idle.classList.add('hidden');
+  loading.classList.add('hidden');
+  results.classList.add('hidden');
+
+  el('query-idle-desc').innerHTML =
+    `Query across all ${project.pages.length} pages in <span style="color:${project.color}">${escapeHtml(project.name)}</span>.`;
+
+  // Show the appropriate state based on the current query status
+  if (state.ui.queryStatus === 'loading') {
+    loading.classList.remove('hidden');
+    el('query-loading-text').textContent = `Searching across ${project.pages.length} pages…`;
+  } else if (state.ui.queryStatus === 'results') {
+    results.classList.remove('hidden');
+    el('query-results-label').textContent = `Results for "${state.ui.lastQuery}"`;
+    renderResultsList(project);
+  } else {
+    idle.classList.remove('hidden');
+  }
+
+  // Input box for query
+  const input = el('query-input');
+
+  // If the input is not focused, update its value
+  if (document.activeElement !== input) input.value = state.ui.queryText;
+
+  // Toggle the 'has-text' class on the input row based on whether the query text is empty
+  const row = el('query-input-row');
+  row.classList.toggle('has-text', state.ui.queryText.trim().length > 0);
+
+  // Toggle the 'active' class on the submit button based on whether there is query text
+  el('query-submit').classList.toggle('active', state.ui.queryText.trim().length > 0);
+}
