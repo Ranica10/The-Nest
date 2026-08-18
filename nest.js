@@ -117,3 +117,97 @@ function render() {
   el('add-page-btn').disabled = state.ui.addingPage === true;
   el('add-page-label').textContent = state.ui.addingPage ? 'Adding…' : 'Add current page'; // Update the button label based on whether a page is being added
 }
+
+// Draw the dropdown list of available projects and allow switching between them
+function renderProjectList(activeProj) {
+  const list = el('project-list');
+  list.innerHTML = '';
+
+  // Render each project in the list
+  state.projects.forEach(p => {
+    const row = document.createElement('div');
+
+    // Check if the project is the active one and apply the 'active' class
+    row.className = 'project-row' + (p.id === activeProj.id ? ' active' : '');
+
+    row.innerHTML = `
+      <span class="dot" style="background:${p.color}"></span>
+      <span class="project-row-name">${escapeHtml(p.name)}</span>
+      <span class="mono small muted">${p.pages.length}</span>
+      ${p.id === activeProj.id ? checkSvg() : ''}
+    `;
+
+    // Add click event to switch to the selected project when clicked
+    row.addEventListener('click', () => {
+      state.activeProjectId = p.id;
+      state.ui.dropdownOpen = false;
+      state.ui.tab = 'pages';
+      persist();
+      render();
+    });
+
+    // Add the project row to the list
+    list.appendChild(row);
+  });
+}
+
+// Return an SVG checkmark icon for the active project in the dropdown list
+function checkSvg() {
+  return `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-5" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// Render the saved page list
+function renderPages(project) {
+  const listEl = el('pages-list');
+  const emptyEl = el('empty-state');
+
+  // If there are no pages in the project, show the empty state message and hide the list
+  if (project.pages.length === 0) {
+    listEl.classList.add('hidden');
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+
+  // If there are pages, show the list and hide the empty state message
+  listEl.classList.remove('hidden');
+  emptyEl.classList.add('hidden');
+
+  listEl.innerHTML = '';
+  // Show the newest first (reverse order)
+  [...project.pages].reverse().forEach(page => {
+    // Create a new div element for each page item
+    const item = document.createElement('div');
+    item.className = 'page-item';
+
+    const letter = (page.domain.replace('www.', '')[0] || '?').toUpperCase(); // Get the first letter of the domain for favicon
+
+    // Page details: favicon, title, domain, snippet, and remove button
+    item.innerHTML = `
+      <div class="page-item-top">
+        <div class="favicon" style="background:${project.color}22;color:${project.color};border:1px solid ${project.color}33">${letter}</div>
+        <div class="page-info">
+          <p class="page-title" title="${escapeHtml(page.title)}">${escapeHtml(page.title)}</p>
+          <p class="page-domain">${escapeHtml(page.domain)}</p>
+          <p class="page-snippet">${escapeHtml(page.snippet)}</p>
+        </div>
+        <button class="page-remove" title="Remove page">✕</button>
+      </div>
+      <div class="page-added">Added ${escapeHtml(page.addedAt)}</div>
+    `;
+
+    // Open the page in a new tab when the title is clicked
+    item.querySelector('.page-title').addEventListener('click', () => chrome.tabs.create({ url: page.url }));
+    // Change the cursor to pointer when hovering over the title 
+    item.querySelector('.page-title').style.cursor = 'pointer';
+    // Add click event to the remove button to delete the page from the project
+    item.querySelector('.page-remove').addEventListener('click', e => {
+      e.stopPropagation();
+      project.pages = project.pages.filter(p => p.id !== page.id);
+      persist();
+      render();
+    });
+
+    // Append the page item to the list element
+    listEl.appendChild(item);
+  });
+}
