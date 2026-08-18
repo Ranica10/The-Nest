@@ -21,5 +21,8 @@
   },
   "side_panel": {
     "default_path": "nest.html"
-  }
+  },
+  "icons": {
+   "16": "logo.png"
+ }
 }
