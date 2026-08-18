@@ -251,3 +251,56 @@ function renderQuery(project) {
   // Toggle the 'active' class on the submit button based on whether there is query text
   el('query-submit').classList.toggle('active', state.ui.queryText.trim().length > 0);
 }
+
+// Build the result cards shown after a local relevance search is complete
+function renderResultsList(project) {
+  const listEl = el('query-results-list');
+  listEl.innerHTML = '';
+
+  // If there are no results, show a message indicating that no matching pages were found
+  if (state.ui.queryResults.length === 0) {
+    listEl.innerHTML = `<div class="no-results">No matching pages found in this project.</div>`;
+    return;
+  }
+
+  // Render each result as a card with its score, title, domain, and description snippet
+  state.ui.queryResults.forEach((result, idx) => {
+    // Calculate the percentage score and determine the label based on the score
+    const pct = Math.round(result.score * 100);
+    const label = pct >= 80 ? 'Strong' : pct >= 50 ? 'Moderate' : 'Partial';
+
+    // Create a new div element for the result card
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="result-top">
+        <span class="result-index" style="background:${project.color}25;color:${project.color}">${idx + 1}</span>
+        <div class="page-info">
+          <p class="result-title">${escapeHtml(result.page.title)}</p>
+          <p class="result-domain">${escapeHtml(result.page.domain)}</p>
+        </div>
+      </div>
+      <p class="result-excerpt">${escapeHtml(result.excerpt)}</p>
+      <div class="result-bar-wrap">
+        <div class="relevance-row">
+          <div class="relevance-track"><div class="relevance-fill" style="width:${pct}%"></div></div>
+          <span class="relevance-label">${label} match</span>
+        </div>
+      </div>
+    `;
+    
+    // On click, open the result page in a new tab
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => chrome.tabs.create({ url: result.page.url }));
+
+    // Add the result card to the list
+    listEl.appendChild(card);
+  });
+}
+
+// Escape HTML special characters for safe rendering in the UI
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str ?? '';
+  return d.innerHTML;
+}
